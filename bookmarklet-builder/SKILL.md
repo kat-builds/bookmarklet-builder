@@ -1,80 +1,69 @@
 ---
 name: bookmarklet-builder
-description: Build a reliable single-file browser bookmarklet from a saved page HTML fixture and a requested browser action. Organize the source HTML, generated bookmarklet, and short documentation into a platform-and-function project folder and validate the final javascript: output.
+description: Build a consistent browser bookmarklet from a saved page HTML file and a requested action. Inspect the supplied HTML, organize the project as platform + function, create bookmarklet-code and a short README, and validate the final javascript: output.
 ---
 
 # Bookmarklet Builder
 
-Use this Skill when the user provides saved page HTML and wants a bookmarklet for a specific action on that page.
+Use this Skill when the user has saved a web page as HTML and wants AI to create a bookmarklet for a specific action on that page.
 
-The saved HTML is the implementation source. Do not guess the page structure when the fixture can answer the question.
+The user provides two things:
+
+1. the saved HTML file
+2. what they want the bookmarklet to do
+
+The Skill handles the page inspection, project organization, bookmarklet creation, and validation.
 
 ## Expected input
 
-The normal starting state is:
-
-```text
-<working-repository>/
-└── <saved-page>.html
-```
-
-The user supplies the HTML file and describes what the bookmarklet should do.
-
-Example:
+A typical request is:
 
 ```text
 $bookmarklet-builder
 
-Use the HTML in the repository root.
+Use this HTML file:
+/Users/name/Downloads/page.html
+
 Create a bookmarklet that copies the job title, company, location and job description as plain text.
 ```
 
-The user does not need to provide selectors when they can be derived from the saved HTML.
+The user should not need to provide CSS selectors or explain the page structure when that information is available in the saved HTML.
 
 ## Workflow
 
-### 1. Find the supplied HTML
+### 1. Use the HTML file the user provides
 
-Inspect the repository root for the HTML file the user supplied.
+Use the exact HTML file or path named by the user.
 
-- If the user names the file, use that file.
-- Otherwise, if there is one obvious HTML file in the root, use it.
-- If multiple plausible HTML files exist and the intended source cannot be determined safely, ask which one to use.
-- Do not substitute a live page, guessed markup, or unrelated fixture for the user's supplied HTML.
+If the user says to use an HTML file in a folder but does not name it:
 
-### 2. Understand the requested action
+- use the one obvious HTML file when there is only one
+- if there are multiple plausible HTML files, ask which one to use
 
-Determine exactly what should happen when the bookmarklet runs.
+Do not replace the supplied HTML with guessed markup or a different page.
 
-Identify:
+### 2. Understand what the user wants
 
-- what content or page element is involved
-- what action should happen
-- what output is expected
-- whether clipboard, URL navigation, clicking, hiding, extraction, or another browser action is required
+Determine the browser action and expected result.
 
-Do not expand the requested behavior unnecessarily.
+Keep the scope to what the user requested. Examples include copying page content, extracting fields, opening a generated URL, searching selected text, converting a value, clicking an element, or hiding an element.
 
-### 3. Inspect the HTML
+### 3. Inspect the saved HTML
 
-Read the supplied HTML before writing site-specific bookmarklet logic.
+Read the HTML before writing site-specific code.
 
-Use it to identify:
+Use the actual page structure to identify the website/platform, the relevant content, and selectors that are likely to be stable.
 
-- the website or platform when possible
-- the actual DOM structure
-- the intended content containers
-- stable selectors
-- optional or repeated fields relevant to the requested action
+Do not ask the user for selectors when they can be determined from the HTML. Do not invent site-specific selectors that the HTML does not support.
 
-Do not invent site-specific selectors that are not supported by the fixture.
+### 4. Create a project folder
 
-### 4. Create the project folder
+Create the project inside the folder containing the supplied HTML unless the user specifies another destination.
 
-Create a short kebab-case folder name based on:
+Name it with a short kebab-case:
 
 ```text
-platform + function
+platform-function
 ```
 
 Examples:
@@ -85,109 +74,92 @@ x-article-text-copy
 semrush-domain-search
 ```
 
-Naming rules:
+Use a recognizable platform/site name when it can be determined from the HTML. Describe the main function without adding unnecessary implementation details.
 
-- use the recognizable platform/site name when it can be determined
-- describe the main bookmarklet function, not every implementation detail
-- keep the name concise
-- do not add generic words such as `bookmarklet` when the repository context already makes that clear
-- if the platform cannot be determined reliably, use a concise functional name rather than inventing one
+### 5. Move and rename the HTML
 
-### 5. Move the source HTML into the project folder
-
-Move the supplied root HTML into the new project folder.
-
-Use `source-code.html` as the canonical fixture filename unless the user explicitly wants to preserve another filename.
-
-After this step, the normal structure is:
+Move the supplied HTML into the new project folder and rename it:
 
 ```text
-<platform-function>/
-└── source-code.html
+source-code.html
 ```
 
-Do not delete or alter the fixture contents merely to simplify implementation.
+Do not modify the saved HTML just to make the bookmarklet easier to build.
 
-### 6. Build the bookmarklet
+### 6. Create bookmarklet-code
 
-Create the bookmarklet from the requested behavior and the actual fixture.
+Create a file named:
 
-Prefer one single-file bookmarklet using:
+```text
+bookmarklet-code
+```
+
+It must contain only the complete code that the user can paste into a browser bookmark's URL field.
+
+Prefer:
 
 ```text
 javascript:(function(){...})()
 ```
 
-or, when async browser APIs are required:
+or, when async browser APIs are needed:
 
 ```text
 javascript:(async function(){...})()
 ```
 
-Use the project folder name as the bookmarklet filename by default:
-
-```text
-seek-job-text-copy/
-├── source-code.html
-└── seek-job-text-copy
-```
+Do not put Markdown fences, explanations, or installation instructions inside `bookmarklet-code`.
 
 Read `references/implementation-rules.md` and `references/common-patterns.md` for implementation guidance.
 
-### 7. Create the companion README
+### 7. Create a short README
 
-Create:
+Create `README.md` in the project folder.
 
-```text
-README.md
-```
-
-Keep it short. Document:
+Keep it short and practical. Explain:
 
 - what the bookmarklet does
-- the page/site it is intended for
-- important output behavior or fallback behavior when relevant
+- which page/site it is intended for
+- important output or fallback behavior when relevant
 
-Do not turn it into a long technical design document.
-
-The normal completed project is:
+The normal completed structure is:
 
 ```text
 <platform-function>/
 ├── source-code.html
-├── <platform-function>
+├── bookmarklet-code
 └── README.md
 ```
 
-If the user explicitly names output files, respect those names.
-
 ### 8. Validate before finishing
 
-Verify:
+Verify that:
 
-1. the bookmarklet starts with `javascript:`
-2. the JavaScript payload parses
-3. the bookmarklet file contains code only, without Markdown fences or explanation
-4. site-specific selectors used by the bookmarklet are supported by the supplied HTML fixture
-5. required fields and optional fields are handled appropriately
-6. clipboard, URL, or other browser API failures have reasonable handling when relevant
+1. `bookmarklet-code` starts with `javascript:`
+2. its JavaScript payload parses
+3. it contains code only
+4. site-specific selectors used by the code are supported by `source-code.html`
+5. required content is handled correctly and optional content does not unnecessarily break the whole action
+6. clipboard, URL, popup, or other browser API failures have reasonable handling when relevant
 
 When repository execution is available, run:
 
 ```bash
-node <skill-directory>/scripts/validate-bookmarklet.mjs <bookmarklet-file>
+node <skill-directory>/scripts/validate-bookmarklet.mjs <project-folder>/bookmarklet-code
 ```
 
-Fix validation failures before considering the task complete.
+The validator checks bookmarklet format and JavaScript syntax. Selector verification against `source-code.html` is a separate implementation check and must not be skipped.
+
+Fix problems before considering the bookmarklet complete.
 
 ## Stability rules
 
-A working bookmarklet matters more than clever or compact code.
+A bookmarklet that works reliably is more important than clever or highly compressed code.
 
+- Base site-specific behavior on the supplied HTML.
 - Prefer stable semantic selectors over brittle deep CSS paths.
 - Prefer a known content container over scraping the whole document.
-- Avoid selectors based only on generated class names when a more stable anchor exists.
-- Treat the saved HTML as evidence for the page structure.
+- Avoid generated class names when a more stable anchor is available.
 - Handle optional fields without crashing the whole bookmarklet.
 - Keep a manual fallback when clipboard access is central to the action and may fail.
 - Encode generated URLs deliberately.
@@ -197,6 +169,6 @@ A working bookmarklet matters more than clever or compact code.
 
 ## Boundaries
 
-This Skill builds bookmarklets from a supplied page fixture. It does not make bookmarklets suitable for every browser workflow.
+Bookmarklets are best for small actions on the page the user is currently viewing.
 
-If the requested behavior requires persistent background execution, extension-only APIs, unavailable cross-origin privileges, or reliable operation across unrelated sites with different DOM structures, explain the limitation rather than pretending the bookmarklet will be reliable.
+If the requested behavior requires persistent background execution, continuous monitoring, extension-only browser APIs, unavailable cross-origin access, reliable operation across unrelated page structures, or a large persistent interface, explain that a bookmarklet may not be the right tool instead of pretending it will be reliable.
