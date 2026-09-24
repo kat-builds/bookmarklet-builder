@@ -1,21 +1,73 @@
 # Bookmarklet Builder
 
-A reusable Skill for turning a browser action into a small, single-file bookmarklet.
+I make small bookmarklets when I want to turn a repeated browser action into one click.
 
-Use it when you want an AI coding agent to inspect a page or saved HTML fixture, identify stable selectors, build the browser action, and return a bookmarklet that is ready to save in the bookmarks bar.
+The difficult part is usually not the `javascript:` wrapper. It is getting the AI to understand the real page structure, use selectors that actually exist, and produce something that still works when I run it in the browser.
 
-## What this Skill is for
+So I made `bookmarklet-builder`.
 
-Bookmarklets are useful for small browser actions that do not justify a full extension, such as:
+Instead of describing the page from memory or asking the AI to guess the DOM, I save the page HTML and give it to the AI with the action I want. The Skill uses that HTML as the source for the implementation, organizes the bookmarklet into its own folder, builds the code, and checks the result before it is finished.
 
-- copying selected page content
-- extracting a few fields from a page
-- opening the current page or domain in another service
-- reading from the clipboard and using that value in a URL
-- clicking, hiding, or transforming page elements
-- exporting page content in a simple text format
+## How I Use It
 
-The Skill focuses on repeatable implementation rules rather than any one website.
+### 1. I save the page HTML
+
+I download or save the HTML for the page I want the bookmarklet to work on and put the HTML file in the root of my working repository.
+
+For example:
+
+```text
+bookmarklets/
+└── source-code.html
+```
+
+The filename does not have to be `source-code.html`. If there is one obvious HTML file in the root, the Skill can use it.
+
+### 2. I tell the AI what I want
+
+For example:
+
+```text
+$bookmarklet-builder
+
+Use the HTML in the repository root.
+
+Create a bookmarklet that copies the job title, company, location and job description as plain text.
+```
+
+I describe the result I want. I do not need to provide CSS selectors or explain the page structure when the saved HTML contains that information.
+
+### 3. The AI creates the bookmarklet project
+
+The Skill tells the AI to:
+
+1. inspect the supplied HTML
+2. identify the website/platform and the requested function
+3. create a short folder name based on `platform + function`
+4. move the supplied HTML into that folder as the source fixture
+5. build the bookmarklet from the actual page structure
+6. create a short companion README
+7. validate the final bookmarklet
+
+For example:
+
+```text
+bookmarklets/
+└── seek-job-text-copy/
+    ├── source-code.html
+    ├── seek-job-text-copy
+    └── README.md
+```
+
+The bookmarklet file contains the final `javascript:` code. The README briefly explains what it does and where it is intended to run.
+
+## Why I Use the HTML
+
+A prompt can tell the AI what the bookmarklet should do, but it cannot tell the AI what the real page DOM looks like unless I provide that information.
+
+The saved HTML gives the AI something concrete to inspect. It can find the actual content containers and selectors instead of guessing them from a description.
+
+The Skill then adds the repeatable rules around that process: project naming, file organization, selector choices, bookmarklet format, fallbacks, and validation.
 
 ## Installation
 
@@ -28,36 +80,9 @@ mkdir -p ~/.agents/skills
 cp -R bookmarklet-builder ~/.agents/skills/
 ```
 
-Then invoke it explicitly:
+Then invoke it with `$bookmarklet-builder`.
 
-```text
-$bookmarklet-builder
-
-Create a bookmarklet that copies the article title and body as plain text.
-Use source-code.html in the current folder as the page fixture.
-```
-
-## How it works
-
-```text
-Describe the browser action
-        ↓
-Inspect the supplied HTML or repository fixture
-        ↓
-Choose stable selectors and browser APIs
-        ↓
-Build the normal JavaScript logic
-        ↓
-Add failure handling where needed
-        ↓
-Convert it into a single-file javascript: bookmarklet
-        ↓
-Validate the generated output
-        ↓
-Return the bookmarklet and a short usage note
-```
-
-## Repository structure
+## What's Inside This Repo
 
 ```text
 .
@@ -72,9 +97,7 @@ Return the bookmarklet and a short usage note
 └── README.md
 ```
 
-## Scope
-
-This repository contains the generic Skill only. It does not include private site-specific bookmarklets or internal workflow examples.
+The Skill contains the reusable workflow only. It does not include my private site-specific bookmarklets or saved page HTML.
 
 ## License
 
