@@ -1,8 +1,8 @@
 # Implementation Rules
 
-## Inspect the page before choosing selectors
+## Use the saved HTML as the source
 
-When a page fixture is available, derive selectors from the actual markup.
+For site-specific bookmarklets, inspect `source-code.html` before choosing selectors.
 
 Prefer, in order:
 
@@ -12,57 +12,61 @@ Prefer, in order:
 4. text or heading relationships when the content is predictable
 5. deeper structural selectors only when necessary
 
-Avoid depending on long ancestry chains or obviously generated class names when a simpler anchor exists.
+Avoid long ancestry chains and obviously generated class names when a simpler stable anchor exists.
 
-## Keep the browser action small
+Do not make the user identify selectors that can be found from the saved HTML.
 
-Bookmarklets are best for one focused action. Examples:
+## Keep the action focused
 
-- copy content
-- extract fields
-- open a generated URL
-- transform visible text
-- click or hide a known element
+Bookmarklets work best for small actions on the current page, such as:
 
-If the behavior needs persistent state, background execution, privileged browser APIs, or a large UI, a browser extension is usually a better fit.
+- copying a specific part of a page
+- extracting information into a useful format
+- converting a time or value
+- searching selected text somewhere else
+- opening the current page or domain in another tool
+- clicking or hiding a page element
+- turning a few repeated browser steps into one click
+
+Do not expand a small bookmarklet request into an extension or web app.
 
 ## Clipboard behavior
 
 For copy-focused bookmarklets:
 
 - prefer `navigator.clipboard.writeText(...)` when available
-- add a fallback when clipboard permission or browser context may block it
-- a simple prompt or temporary textarea fallback is acceptable
+- add a manual fallback when clipboard access may be blocked
 - do not lose the generated text when copying fails
 
 For read-from-clipboard workflows:
 
 - handle clipboard denial
-- validate the read value before using it
+- validate the value before using it
 - fall back to `prompt()` when appropriate
 
 ## URL construction
 
-When the bookmarklet opens another service:
+When the bookmarklet opens or searches another service:
 
-- normalize the current URL/domain before inserting it
-- encode values with `encodeURIComponent` or deliberate equivalent logic
-- preserve required reserved characters only when the destination expects them
-- open a new tab only when that is part of the requested behavior
+- normalize the source URL, domain, selected text, or value as needed
+- encode inserted values deliberately
+- preserve reserved characters only when the destination requires them
+- open a new tab only when that matches the requested action
 
 ## Content extraction
 
 When copying page content:
 
-- restrict extraction to the intended content container
+- extract from the intended content area rather than the whole document
 - preserve useful line breaks and list structure when practical
-- omit unrelated navigation, comments, ads, or controls
-- handle optional title/metadata fields safely
-- do not scrape the whole document when a clear content container exists
+- omit unrelated navigation, ads, comments, and controls when they are not part of the request
+- handle optional fields safely
 
-## Output
+## bookmarklet-code
 
-Default final form:
+The generated file is always named `bookmarklet-code` unless the user explicitly requests another name.
+
+It contains only the final bookmarklet:
 
 ```text
 javascript:(function(){...})()
@@ -74,4 +78,4 @@ or, when async browser APIs are needed:
 javascript:(async function(){...})()
 ```
 
-Do not wrap the final bookmarklet in Markdown when writing it directly to a target file.
+Do not include Markdown fences or explanatory prose in the file.
