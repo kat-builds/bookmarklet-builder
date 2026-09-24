@@ -46,7 +46,7 @@ You don't need to rename or edit the HTML. The AI will organize it for you.
 
 ### 2. Tell the AI what you want
 
-If you installed the Skill, you can use:
+If you installed the Skill in your coding agent, you can use:
 
 ```text
 $bookmarklet-builder
@@ -57,19 +57,30 @@ Use this HTML file:
 Create a bookmarklet that copies the job title, company, location and job description as plain text.
 ```
 
-If you haven't installed the Skill, give your AI the repository instead:
+You only need to tell the AI **which HTML file to use** and **what you want the bookmarklet to do**. The Skill will organize the files for you.
+
+#### Or just use it in an AI chat
+
+If you're using a regular AI chat instead of a coding agent that can work with your local files, you can still use the Skill.
+
+Upload the HTML file directly to the chat, then send:
 
 ```text
 Use the Bookmarklet Builder Skill from:
 https://github.com/kat-builds/bookmarklet-builder
 
-Use this HTML file:
-/Users/name/Downloads/page.html
+Use the HTML file I uploaded.
 
 Create a bookmarklet that copies the job title, company, location and job description as plain text.
+
+Give me the final bookmarklet code and a short explanation of what it does.
 ```
 
-You only need to tell the AI **which HTML file to use** and **what you want the bookmarklet to do**.
+The AI can use the same Skill instructions to build the bookmarklet and give you the **bookmarklet code directly in the chat**.
+
+Then you can skip Step 3 and go straight to **Step 4: Add it to your browser**.
+
+This works well for simple bookmarklets that you probably won't need to test or change many times, or keep as an organized project.
 
 ### 3. The AI builds and organizes it
 
@@ -110,6 +121,8 @@ Copy SEEK Job
 ```
 
 Open `bookmarklet-code`, copy the entire code, and paste it into the bookmark's **URL** field.
+
+If you used the AI chat option, copy the final bookmarklet code from the chat instead.
 
 Save the bookmark.
 
