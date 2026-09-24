@@ -1,104 +1,132 @@
 # Bookmarklet Builder
 
-I make small bookmarklets when I want to turn a repeated browser action into one click.
+I work in the browser a lot.
 
-The difficult part is usually not the `javascript:` wrapper. It is getting the AI to understand the real page structure, use selectors that actually exist, and produce something that still works when I run it in the browser.
+On the iPhone, we have Shortcuts for turning things we do often into quick actions. Browsers have their own little shortcuts too.
 
-So I made `bookmarklet-builder`.
+Some are search shortcuts — type a keyword and search a specific site.
 
-Instead of describing the page from memory or asking the AI to guess the DOM, I save the page HTML and give it to the AI with the action I want. The Skill uses that HTML as the source for the implementation, organizes the bookmarklet into its own folder, builds the code, and checks the result before it is finished.
+Some come from browser extensions.
 
-## How I Use It
+And some can sit right in your bookmarks bar: click a bookmark, and it does something on the page for you.
 
-### 1. I save the page HTML
+These are called **bookmarklets**.
 
-I download or save the HTML for the page I want the bookmarklet to work on and put the HTML file in the root of my working repository.
+A bookmarklet is a small piece of code saved as a bookmark that does something with the page you're already on.
 
-For example:
+You can make one that copies a specific part of a page, extracts information into a format you want, converts a time or value, takes selected text and searches for it somewhere else, opens the current domain in another tool, clicks or hides something on the page, or turns a few repeated browser steps into one click.
 
-```text
-bookmarklets/
-└── source-code.html
-```
+And now that we have AI, we don't really need to know how to write all of that code ourselves. We can just save the page HTML, tell the AI what we want the bookmarklet to do, and ask it to build one.
 
-The filename does not have to be `source-code.html`. If there is one obvious HTML file in the root, the Skill can use it.
+The problem is that the result isn't always consistent.
 
-### 2. I tell the AI what I want
+That's why I made **Bookmarklet Builder**, a Skill that helps AI create bookmarklets in a more consistent way.
 
-For example:
+---
+
+## How to Use It
+
+Install the Skill, or just give your AI this repository and ask it to use the Skill:
+
+https://github.com/kat-builds/bookmarklet-builder
+
+### 1. Save the page HTML
+
+Open the page you want the bookmarklet to work on.
+
+Save the page HTML using any of these methods:
+
+- Go to **File → Save Page As**
+- Right-click the page and choose **Save As**
+- Use **Ctrl + S** on Windows or **Cmd + S** on Mac
+
+Then put the saved HTML file in the folder where you want to create your bookmarklet project.
+
+You don't need to rename or edit the HTML. The AI will organize it for you.
+
+### 2. Tell the AI what you want
+
+If you installed the Skill, you can use:
 
 ```text
 $bookmarklet-builder
 
-Use the HTML in the repository root.
+Use this HTML file:
+/Users/name/Downloads/page.html
 
 Create a bookmarklet that copies the job title, company, location and job description as plain text.
 ```
 
-I describe the result I want. I do not need to provide CSS selectors or explain the page structure when the saved HTML contains that information.
+If you haven't installed the Skill, give your AI the repository instead:
 
-### 3. The AI creates the bookmarklet project
+```text
+Use the Bookmarklet Builder Skill from:
+https://github.com/kat-builds/bookmarklet-builder
+
+Use this HTML file:
+/Users/name/Downloads/page.html
+
+Create a bookmarklet that copies the job title, company, location and job description as plain text.
+```
+
+You only need to tell the AI **which HTML file to use** and **what you want the bookmarklet to do**.
+
+### 3. The AI builds and organizes it
 
 The Skill tells the AI to:
 
-1. inspect the supplied HTML
-2. identify the website/platform and the requested function
-3. create a short folder name based on `platform + function`
-4. move the supplied HTML into that folder as the source fixture
-5. build the bookmarklet from the actual page structure
-6. create a short companion README
-7. validate the final bookmarklet
+1. Inspect the HTML you provided
+2. Understand the website and what you want the bookmarklet to do
+3. Create a short folder name based on the **platform + function**
+4. Move the HTML into the new folder and rename it `source-code.html`
+5. Create the bookmarklet as `bookmarklet-code`
+6. Create a short `README.md` explaining what it does
+7. Validate the bookmarklet before finishing
 
 For example:
 
 ```text
-bookmarklets/
+your-folder/
 └── seek-job-text-copy/
     ├── source-code.html
-    ├── seek-job-text-copy
+    ├── bookmarklet-code
     └── README.md
 ```
 
-The bookmarklet file contains the final `javascript:` code. The README briefly explains what it does and where it is intended to run.
+`source-code.html` is the page you saved.
 
-## Why I Use the HTML
+`bookmarklet-code` contains the code you will add to your browser.
 
-A prompt can tell the AI what the bookmarklet should do, but it cannot tell the AI what the real page DOM looks like unless I provide that information.
+`README.md` is a short explanation of what the bookmarklet does and where to use it.
 
-The saved HTML gives the AI something concrete to inspect. It can find the actual content containers and selectors instead of guessing them from a description.
+### 4. Add it to your browser
 
-The Skill then adds the repeatable rules around that process: project naming, file organization, selector choices, bookmarklet format, fallbacks, and validation.
+Now create a new bookmark in your browser. You can also bookmark any page first and then edit that bookmark.
 
-## Installation
-
-Copy the `bookmarklet-builder` directory into a Skills location supported by your coding agent.
-
-For agents that support the shared Skills directory:
-
-```bash
-mkdir -p ~/.agents/skills
-cp -R bookmarklet-builder ~/.agents/skills/
-```
-
-Then invoke it with `$bookmarklet-builder`.
-
-## What's Inside This Repo
+Change the bookmark name to something that describes the action, for example:
 
 ```text
-.
-├── bookmarklet-builder/
-│   ├── SKILL.md
-│   ├── references/
-│   │   ├── implementation-rules.md
-│   │   └── common-patterns.md
-│   └── scripts/
-│       └── validate-bookmarklet.mjs
-├── LICENSE
-└── README.md
+Copy SEEK Job
 ```
 
-The Skill contains the reusable workflow only. It does not include my private site-specific bookmarklets or saved page HTML.
+Open `bookmarklet-code`, copy the entire code, and paste it into the bookmark's **URL** field.
 
-## License
+Save the bookmark.
 
-Apache License 2.0.
+That's it. When you're on the page it was made for, click the bookmark and it will run the action for you.
+
+## What Bookmarklets Can't Always Do
+
+Bookmarklets are great for small actions on the page you're currently viewing, but they don't have the same access as a browser extension.
+
+They may not be suitable when you need to:
+
+- Run something automatically in the background
+- Keep working after you close or leave the page
+- Monitor pages continuously
+- Use browser features that normal page JavaScript cannot access
+- Read content from another website that the current page cannot access
+- Work reliably across many websites that all have different page structures
+- Build a large interface or a tool with lots of persistent data
+
+For those kinds of tasks, a browser extension or a small web app may be a better fit.
