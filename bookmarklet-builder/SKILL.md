@@ -1,22 +1,25 @@
 ---
 name: bookmarklet-builder
-description: Build a consistent browser bookmarklet from a saved page HTML file and a requested action. Inspect the supplied HTML, organize the project as platform + function, create bookmarklet-code and a short README, and validate the final javascript: output.
+description: Build a consistent browser bookmarklet from a saved page HTML file and a requested action. Inspect the supplied HTML and either create an organized bookmarklet project in a coding environment or return the final bookmarklet code and a short explanation in chat.
 ---
 
 # Bookmarklet Builder
 
-Use this Skill when the user has saved a web page as HTML and wants AI to create a bookmarklet for a specific action on that page.
+Use this Skill when the user provides saved page HTML and wants a bookmarklet for a specific action on that page.
 
-The user provides two things:
+The user provides:
 
-1. the saved HTML file
+1. the saved or uploaded HTML
 2. what they want the bookmarklet to do
 
-The Skill handles the page inspection, project organization, bookmarklet creation, and validation.
+Use the same HTML-first implementation and stability rules in both supported modes:
+
+- **Project mode** — for coding agents that can work with local files.
+- **Chat mode** — for regular AI chats where the HTML is uploaded directly.
 
 ## Expected input
 
-A typical request is:
+Project mode example:
 
 ```text
 $bookmarklet-builder
@@ -27,36 +30,47 @@ Use this HTML file:
 Create a bookmarklet that copies the job title, company, location and job description as plain text.
 ```
 
-The user should not need to provide CSS selectors or explain the page structure when that information is available in the saved HTML.
+Chat mode example:
 
-## Workflow
+```text
+Use the HTML file I uploaded.
 
-### 1. Use the HTML file the user provides
+Create a bookmarklet that copies the job title, company, location and job description as plain text.
 
-Use the exact HTML file or path named by the user.
+Give me the final bookmarklet code and a short explanation of what it does.
+```
 
-If the user says to use an HTML file in a folder but does not name it:
+The user should not need to provide CSS selectors or explain the page structure when that information is available in the supplied HTML.
 
-- use the one obvious HTML file when there is only one
-- if there are multiple plausible HTML files, ask which one to use
+## 1. Inspect the HTML
 
-Do not replace the supplied HTML with guessed markup or a different page.
+Use the exact HTML file or uploaded HTML supplied by the user.
 
-### 2. Understand what the user wants
+Read it before writing site-specific code. Use the actual page structure to identify the website/platform, relevant content, and selectors that are likely to be stable.
+
+If several plausible HTML files are available and the intended source cannot be determined safely, ask which one to use.
+
+Do not replace the supplied HTML with guessed markup. Do not ask the user for selectors when they can be determined from the HTML.
+
+## 2. Understand the requested action
 
 Determine the browser action and expected result.
 
 Keep the scope to what the user requested. Examples include copying page content, extracting fields, opening a generated URL, searching selected text, converting a value, clicking an element, or hiding an element.
 
-### 3. Inspect the saved HTML
+Read `references/implementation-rules.md` and `references/common-patterns.md` for implementation guidance.
 
-Read the HTML before writing site-specific code.
+## 3. Choose the delivery mode
 
-Use the actual page structure to identify the website/platform, the relevant content, and selectors that are likely to be stable.
+Use **Project mode** when the environment can create and manage files and the user is working with a local/project HTML file.
 
-Do not ask the user for selectors when they can be determined from the HTML. Do not invent site-specific selectors that the HTML does not support.
+Use **Chat mode** when the user uploads the HTML directly in a regular AI chat, asks for the result in chat, or the environment cannot manage the user's local files.
 
-### 4. Create a project folder
+Do not require project folders merely to use the Skill in Chat mode.
+
+## Project mode
+
+### Create the project folder
 
 Create the project inside the folder containing the supplied HTML unless the user specifies another destination.
 
@@ -66,17 +80,9 @@ Name it with a short kebab-case:
 platform-function
 ```
 
-Examples:
+Use a recognizable platform/site name when it can be determined. Describe the main function without unnecessary implementation details.
 
-```text
-seek-job-text-copy
-x-article-text-copy
-semrush-domain-search
-```
-
-Use a recognizable platform/site name when it can be determined from the HTML. Describe the main function without adding unnecessary implementation details.
-
-### 5. Move and rename the HTML
+### Move and rename the HTML
 
 Move the supplied HTML into the new project folder and rename it:
 
@@ -84,39 +90,21 @@ Move the supplied HTML into the new project folder and rename it:
 source-code.html
 ```
 
-Do not modify the saved HTML just to make the bookmarklet easier to build.
+Do not modify the saved HTML just to make implementation easier.
 
-### 6. Create bookmarklet-code
+### Create bookmarklet-code
 
-Create a file named:
+Create:
 
 ```text
 bookmarklet-code
 ```
 
-It must contain only the complete code that the user can paste into a browser bookmark's URL field.
+It must contain only the complete bookmarklet code.
 
-Prefer:
+### Create the companion README
 
-```text
-javascript:(function(){...})()
-```
-
-or, when async browser APIs are needed:
-
-```text
-javascript:(async function(){...})()
-```
-
-Do not put Markdown fences, explanations, or installation instructions inside `bookmarklet-code`.
-
-Read `references/implementation-rules.md` and `references/common-patterns.md` for implementation guidance.
-
-### 7. Create a short README
-
-Create `README.md` in the project folder.
-
-Keep it short and practical. Explain:
+Create a short `README.md` explaining:
 
 - what the bookmarklet does
 - which page/site it is intended for
@@ -131,16 +119,7 @@ The normal completed structure is:
 └── README.md
 ```
 
-### 8. Validate before finishing
-
-Verify that:
-
-1. `bookmarklet-code` starts with `javascript:`
-2. its JavaScript payload parses
-3. it contains code only
-4. site-specific selectors used by the code are supported by `source-code.html`
-5. required content is handled correctly and optional content does not unnecessarily break the whole action
-6. clipboard, URL, popup, or other browser API failures have reasonable handling when relevant
+### Validate the project result
 
 When repository execution is available, run:
 
@@ -149,6 +128,49 @@ node <skill-directory>/scripts/validate-bookmarklet.mjs <project-folder>/bookmar
 ```
 
 The validator checks bookmarklet format and JavaScript syntax. Selector verification against `source-code.html` is a separate implementation check and must not be skipped.
+
+## Chat mode
+
+Do not create or require a project folder.
+
+Inspect the uploaded HTML and build the bookmarklet using the same implementation and stability rules as Project mode.
+
+Return:
+
+1. the complete bookmarklet code in a code block
+2. a short explanation of what it does and where it is intended to run
+
+Keep the explanation practical. Do not add project-file instructions unless the user asks for them.
+
+Chat mode is intended for simple bookmarklets that the user is unlikely to need to test or change many times or keep as an organized project.
+
+## Bookmarklet format
+
+Prefer:
+
+```text
+javascript:(function(){...})()
+```
+
+or, when async browser APIs are needed:
+
+```text
+javascript:(async function(){...})()
+```
+
+In Project mode, `bookmarklet-code` contains code only, without Markdown fences or explanations.
+
+In Chat mode, put the complete bookmarklet in a code block so the user can copy it.
+
+## Validate before finishing
+
+In either mode, verify that:
+
+1. the bookmarklet starts with `javascript:`
+2. its JavaScript payload parses when execution tools are available
+3. site-specific selectors used by the code are supported by the supplied HTML
+4. required content is handled correctly and optional content does not unnecessarily break the whole action
+5. clipboard, URL, popup, or other browser API failures have reasonable handling when relevant
 
 Fix problems before considering the bookmarklet complete.
 
