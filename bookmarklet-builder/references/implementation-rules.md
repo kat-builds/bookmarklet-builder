@@ -30,6 +30,12 @@ Bookmarklets work best for small actions on the current page, such as:
 
 Do not expand a small bookmarklet request into an extension or web app.
 
+## User feedback
+
+Use one non-blocking, automatically dismissed toast for routine success, failure, or empty-content feedback. Do not use `alert()` or `confirm()` for status messages or require an OK/confirmation click. Reuse or replace an existing toast on repeated execution so messages do not stack; keep it out of extracted content and mark it as an accessible status message.
+
+Keep interactive UI only when the task needs input, manual copying, or explicit approval of a consequential action. A manual-copy fallback may remain open until the user dismisses it; it is not a status confirmation.
+
 ## Clipboard behavior
 
 For copy-focused bookmarklets:
